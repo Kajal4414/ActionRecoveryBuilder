@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       MANIFEST_URL:
-        description: "MANIFEST_URL (if using SSH keys, use git@github.com:repo URL format)"
+        description: "MANIFEST_URL"
         required: true
-        default: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git"
+        default: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp"
       MANIFEST_BRANCH:
         description: "MANIFEST_BRANCH"
         required: true
@@ -14,39 +14,34 @@ on:
       DEVICE_TREE_URL:
         description: "DEVICE_TREE_URL"
         required: true
-        default: "https://github.com/TeamWin/android_device_asus_I003D"
+        default: "https://github.com/deedev-projects/device_xiaomi_spes-twrp"
       DEVICE_TREE_BRANCH:
         description: "DEVICE_TREE_BRANCH"
         required: true
-        default: "android-12.1"
+        default: "twrp-12.1"
       DEVICE_PATH:
         description: "DEVICE_PATH"
         required: true
-        default: "device/asus/I003D"
-      COMMON_TREE_URL:
-        description: "COMMON_TREE_URL (if no common tree, leave blank)"
-        required: false
-      COMMON_PATH:
-        description: "COMMON_PATH (if no common tree, leave blank)"
-        required: false
+        default: "device/xiaomi/spes"
       DEVICE_NAME:
         description: "DEVICE_NAME"
         required: true
-        default: "I003D"
+        default: "spes"
       MAKEFILE_NAME:
         description: "MAKEFILE_NAME"
         required: true
-        default: "twrp_I003D"
+        default: "twrp_spes"
       BUILD_TARGET:
         description: "BUILD_TARGET"
         required: true
-        default: "recovery"
+        default: "boot"
 
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: ubuntu-18.04
-    # You can use either of the ubuntu-18.04 or ubuntu-20.04 runner
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - name: Display Run Parameters
         run: |
@@ -64,29 +59,23 @@ jobs:
       # You might want to Checkout your repo first, but not mandatory
       - name: Check Out
         uses: actions/checkout@v3
+
       # Cleanup The Actions Workspace Using Custom Composite Run Actions
       - name: Cleanup
         uses: rokibhasansagar/slimhub_actions@main
-        # That's it! Now use your normal steps
 
+      # That's it! Now use your normal steps
       - name: Prepare the environment
         run: |
           sudo apt update
           sudo apt -y upgrade
-          sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev python
+          sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev python
 
       - name: Install OpenJDK
         uses: actions/setup-java@v3
         with:
           distribution: "zulu"
           java-version: "8"
-
-      - name: Setup SSH Keys
-        if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: |
-            ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Install repo
         run: |
@@ -100,8 +89,8 @@ jobs:
           mkdir workspace
           cd workspace
           echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
-          git config --global user.name "Captain Throwback"
-          git config --global user.email "captainthrowback@hotmail.com"
+          git config --global user.name ${{ github.repository_owner }}
+          git config --global user.email "81718060+sakshiagrwal@users.noreply.github.com"
           repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
         id: pwd
 
@@ -113,14 +102,6 @@ jobs:
       - name: Clone device tree
         run: |
           git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
-        working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-
-      - name: Clone common tree
-        if: |
-          github.event.inputs.COMMON_TREE_URL != null
-          && github.event.inputs.COMMON_PATH != null
-        run: |
-          git clone ${{ github.event.inputs.COMMON_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.COMMON_PATH }}
         working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
       - name: Check Build Tree
@@ -146,7 +127,6 @@ jobs:
       - name: Building recovery
         run: |
           source build/envsetup.sh
-          export ALLOW_MISSING_DEPENDENCIES=true
           lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
@@ -157,8 +137,11 @@ jobs:
           name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
           tag_name: ${{ github.run_id }}
           body: |
-            Manifest: ${{ github.event.inputs.MANIFEST_BRANCH }}
-            Device: ${{ github.event.inputs.DEVICE_NAME }}
-            Target: ${{ github.event.inputs.BUILD_TARGET }}.img
+            ### TeamWin Recovery Project v3.7.0
+            
+            **_Device: ${{ github.event.inputs.DEVICE_NAME }}_**
+            **_Target: ${{ github.event.inputs.BUILD_TARGET }}.img_**
+            **_Device Tree: [URL](${{ github.event.inputs.DEVICE_TREE_URL }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }})_**
+            **_Manifest: [URL](${{ github.event.inputs.MANIFEST_URL }}/tree/${{ github.event.inputs.MANIFEST_BRANCH }})_**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
