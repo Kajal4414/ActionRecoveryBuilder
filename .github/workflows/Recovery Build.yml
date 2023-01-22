@@ -6,19 +6,19 @@ on:
       MANIFEST_URL:
         description: "MANIFEST_URL"
         required: true
-        default: "https://github.com/PitchBlackRecoveryProject/manifest_pb"
+        default: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp"
       MANIFEST_BRANCH:
         description: "MANIFEST_BRANCH"
         required: true
-        default: "android-12.1"
+        default: "twrp-12.1"
       DEVICE_TREE_URL:
         description: "DEVICE_TREE_URL"
         required: true
-        default: "https://github.com/scas-projects/device_xiaomi_spes-pbrp"
+        default: "https://github.com/Jabiyeff/twrp_device_xiaomi_spes"
       DEVICE_TREE_BRANCH:
         description: "DEVICE_TREE_BRANCH"
         required: true
-        default: "android-12.1"
+        default: "twrp-12.1"
       DEVICE_PATH:
         description: "DEVICE_PATH"
         required: true
@@ -30,7 +30,7 @@ on:
       MAKEFILE_NAME:
         description: "MAKEFILE_NAME"
         required: true
-        default: "omni_spes"
+        default: "twrp_spes"
       BUILD_TARGET:
         description: "BUILD_TARGET"
         required: true
@@ -90,7 +90,7 @@ jobs:
           cd workspace
           echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
           git config --global user.name ${{ github.repository_owner }}
-          git config --global user.email "37282143+Deepak5310@users.noreply.github.com"
+          git config --global user.email "81718060+sakshiagrwal@users.noreply.github.com"
           repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
         id: pwd
 
@@ -124,12 +124,6 @@ jobs:
         with:
           swap-size-gb: 12
 
-      - name: Clone Custom
-        run: |
-          rm -rf vendor/pb
-          git clone --depth=1 https://github.com/Agatha-Prjkt/vendor_pb vendor/pb
-        working-directory: workspace
-
       - name: Building recovery
         run: |
           source build/envsetup.sh
@@ -140,10 +134,10 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-          name: ${{ github.event.inputs.DEVICE_NAME }}-pbrp
+          name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
           tag_name: ${{ github.run_id }}
           body: |
-            ### PitchBlack Recovery Project 4.0
+            ### TeamWin Recovery Project 3.7.0
             
             **_Device: ${{ github.event.inputs.DEVICE_NAME }}_**
             **_Target: ${{ github.event.inputs.BUILD_TARGET }}.img_**
