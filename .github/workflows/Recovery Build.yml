@@ -6,19 +6,19 @@ on:
       MANIFEST_URL:
         description: "MANIFEST_URL"
         required: true
-        default: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp"
+        default: "https://github.com/PitchBlackRecoveryProject/manifest_pb"
       MANIFEST_BRANCH:
         description: "MANIFEST_BRANCH"
         required: true
-        default: "twrp-12.1"
+        default: "android-12.1"
       DEVICE_TREE_URL:
         description: "DEVICE_TREE_URL"
         required: true
-        default: "https://github.com/deedev-projects/device_xiaomi_spes-twrp"
+        default: "https://github.com/scas-projects/device_xiaomi_spes-pbrp"
       DEVICE_TREE_BRANCH:
         description: "DEVICE_TREE_BRANCH"
         required: true
-        default: "twrp-12.1"
+        default: "android-12.1"
       DEVICE_PATH:
         description: "DEVICE_PATH"
         required: true
@@ -30,7 +30,7 @@ on:
       MAKEFILE_NAME:
         description: "MAKEFILE_NAME"
         required: true
-        default: "twrp_spes"
+        default: "omni_spes"
       BUILD_TARGET:
         description: "BUILD_TARGET"
         required: true
@@ -124,6 +124,12 @@ jobs:
         with:
           swap-size-gb: 12
 
+      - name: Clone Custom
+        run: |
+          rm -rf vendor/pb
+          git clone --depth=1 https://github.com/Agatha-Prjkt/vendor_pb vendor/pb
+        working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
       - name: Building recovery
         run: |
           source build/envsetup.sh
@@ -137,7 +143,7 @@ jobs:
           name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
           tag_name: ${{ github.run_id }}
           body: |
-            ### TeamWin Recovery Project v3.7.0
+            ### PitchBlack Recovery Project v4.0
             
             **_Device: ${{ github.event.inputs.DEVICE_NAME }}_**
             **_Target: ${{ github.event.inputs.BUILD_TARGET }}.img_**
