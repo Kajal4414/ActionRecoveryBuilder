@@ -1,5 +1,7 @@
 # Use Github Action to compile Recovery
 
+[![Recovery Build](https://github.com/sakshiagrwal/ActionRecoveryBuilder/actions/workflows/Recovery%20Build.yml/badge.svg)](https://github.com/sakshiagrwal/ActionRecoveryBuilder/actions/workflows/Recovery%20Build.yml)
+
 - Support ~~OFRP~~, SHRP, TWRP compilation and production
 
 ---
